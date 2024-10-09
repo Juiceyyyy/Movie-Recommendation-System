@@ -4,7 +4,7 @@ import pickle
 import requests
 
 def fetch_poster(movie_id):
-    response = requests.get('https://api.themoviedb.org/3/movie/{}?api_key=020b311fe0559698373a16008dc6a672&language=en-US'.format(movie_id))
+    response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}?api_key=020b311fe0559698373a16008dc6a672&language=en-US')
     data = response.json()
     return "https://image.tmdb.org/t/p/w500/" + data['poster_path']
 
@@ -51,9 +51,13 @@ if st.button('Recommend'):
             st.text(name)
             st.image(poster, use_column_width=True)
 
-    # Update search results
+    # Update search results and reset the index for sequential numbering
     new_result = pd.DataFrame({'Selected Movie': [selected_movie_name], 'Recommended Movies': [", ".join(names)]})
-    st.session_state.search_results = st.session_state.search_results.append(new_result, ignore_index=True)
+    st.session_state.search_results = pd.concat([st.session_state.search_results, new_result], ignore_index=True)  # Use ignore_index=True
+
+# Add line numbers starting from 1
+st.session_state.search_results.reset_index(drop=True, inplace=True)
+st.session_state.search_results.index += 1  # Start index from 1
 
 # Display all search results
 st.write("## All Search Results")
